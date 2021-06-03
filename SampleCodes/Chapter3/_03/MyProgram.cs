@@ -10,7 +10,7 @@ namespace _03
             {
                 throw new ArgumentException("リクエストのNameがnullまたは空です。");
             }
-
+            
             user.ChangeName(request.Name);
         }
     }

@@ -2,6 +2,9 @@
 
 namespace _04
 {
+    /*
+     * 識別子 UserId
+     */
     class UserId
     {
         private string value;

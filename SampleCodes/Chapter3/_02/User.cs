@@ -2,6 +2,9 @@
 
 namespace _02
 {
+    /*
+     * ChangeNameメソッドを通じてユーザ名を変更できる
+     */
     class User
     {
         private string name;

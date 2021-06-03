@@ -6,7 +6,8 @@
         {
             var program = new MyProgram();
             var user = new User("test-user");
-            var request = new UserChangeNameRequest {Name = null};
+            var request = new UserChangeNameRequest {Name = "Kenji"};
+           // var request = new UserChangeNameRequest {Name = null};
             program.Main(user, request);
         }
     }

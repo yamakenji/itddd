@@ -2,6 +2,11 @@
 
 namespace _05
 {
+    /*
+     * オブジェクトの同一性を判別す津ために識別子を追加
+     * ユーザ名が変更されても同一のユーザとして認識できる
+     */
+    
     class User
     {
         private readonly UserId id; // 識別子

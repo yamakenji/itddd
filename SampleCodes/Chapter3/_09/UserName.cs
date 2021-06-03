@@ -2,6 +2,11 @@
 
 namespace _09
 {
+    /*
+     * 饒舌なコード
+     * 開発者は存在するルールを確認できる
+     * 
+     */
     class UserName
     {
         private readonly string value;

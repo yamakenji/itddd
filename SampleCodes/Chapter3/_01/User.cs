@@ -2,6 +2,10 @@
 
 namespace _01
 {
+    /*
+     * ユーザを表すクラス
+     * ユーザ名の変更ができない
+     */
     class User
     {
         private string name;

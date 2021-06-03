@@ -4,7 +4,7 @@ namespace _06
 {
     class User : IEquatable<User>
     {
-        private readonly UserId id; // 識別子
+        private readonly UserId id; // readonlyをつけて再代入を不可能にすることで、IDを変化させない
         private string name;
 
         public User(UserId id, string name)
@@ -23,6 +23,9 @@ namespace _06
             this.name = name;
         }
 
+        /*
+         * 同一性の比較を行う
+         */
         public bool Equals(User other)
         {
             if (ReferenceEquals(null, other)) return false;

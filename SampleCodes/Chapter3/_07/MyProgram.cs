@@ -11,6 +11,9 @@ namespace _07
             Check(left, right);
         }
 
+        /*
+         * エンティティの比較を行う
+         */
         void Check(User leftUser, User rightUser)
         {
             if (leftUser.Equals(rightUser))
