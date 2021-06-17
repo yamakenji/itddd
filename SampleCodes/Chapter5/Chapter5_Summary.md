@@ -77,11 +77,101 @@
 ## 5.6 テスト用のリポジトリを作成する
 
 * インメモリで動作するデータストアを用意する
-  * 連想配列
-  * _13/InMemoryUserRepository.cs
+  * 連想配列を利用した例
+    * _13/InMemoryUserRepository.cs
+* データベースに接続する必要がなく、テストが気軽に行えるようになる
 
 ## 5.7 オブジェクトリレーショナルマッパーを用いたリポジトリを作成する
 
+* ORM (Entitiy Framework) を利用したリポジトリ実装の例
+  * _18/EFUserRepository.cs
+* User データモデル (エンティティ) → DDD でいうところのエンティティとは異なるので注意!
+  * _19/UserDataModels.cs
+
+* リポジトリの実体を差し替えるだけでほぼ同じコードでテストができる
+
+* _17/EntryPoint.cs
+
+``` C#
+  var userRepository = new InMemoryUserRepository();
+  var program = new Program(userRepository);
+  program.CreateUser("nrs");
+  // データを取り出して確認
+  var head = userRepository.Store.Values.First();
+  Assert.AreEqual("nrs", head.Name);
+```
+
+* _21/EntryPoint.cs
+
+``` C#
+  var myContext = MyDbContext.Create();
+  var userRepository = new EFUserRepository(myContext);
+  var program = new Program(userRepository);
+  program.CreateUser("naruse");
+  // データを取り出して確認
+  var head = myContext.Users.First();
+  Assert.AreEqual("naruse", head.Name);
+```
+
 ## 5.8 リポジトリに定義されたふるまい
+
+* リポジトリにはオブジェクトの永続化と再構築に関するふるまいが定義される
+
+### 5.8.1 永続化に関するふるまい
+
+永続化のふるまいは永続化をおこなうオブジェクトを引数にとる
+
+* _22/IUserRepository.cs
+
+``` C#
+interface IUserRepository
+{
+    void Save(User user);
+    void Delete(User user);
+    User Find(UserId id);
+    User Find(UserName name);
+}
+```
+
+悪い例
+
+* _23/IUserRepository.cs
+
+``` C#
+interface IUserRepository
+{
+    void Save(User user);
+    // 対象の識別子と更新項目を引き渡して更新させるメソッドは用意しない
+    void UpdateName(UserId id, UserName name);
+    void Delete(User user);
+    User Find(UserId id);
+    User Find(UserName name);
+}
+
+```
+
+多くの更新処理を定義させる結果になる
+
+``` C#
+interface IUserRepository
+{
+    void Save(User user);
+    // 煩雑な更新処理が定義されたリポジトリ
+    void UpdateName(UserId id, UserName name);
+    void UpdateEmail(UserId id, Email mail);
+    void UpdateAddress(UserId id, Address address);
+
+    void Delete(User user);
+    User Find(UserId id);
+    User Find(UserName name);
+}
+```
+
+-> そもそもオブジェクトが保持するデータを変更するのであれば、それはオブジェクト自体に依頼すべき
+
+* オブジェクトを生成する処理もリポジトリには定義しない -> ファクトリ
+* オブジェクトの破棄はリポジトリで行う
+
+### 5.8.2 再構築に関するふるまい
 
 ## 5.9 まとめ
