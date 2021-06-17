@@ -152,6 +152,8 @@ interface IUserRepository
 
 多くの更新処理を定義させる結果になる
 
+* _24/IUserRepository.cs
+
 ``` C#
 interface IUserRepository
 {
@@ -174,4 +176,36 @@ interface IUserRepository
 
 ### 5.8.2 再構築に関するふるまい
 
+* 識別子によって検索されるメソッドの例
+  
+  ``` C#
+  interface IUserRepository
+  {
+      User Find(UserId id);
+      (...略...)
+  }
+  ```
+
+* 場合によっては（パフォーマンスの問題など）オーバーロードを利用してメソッドを定義する
+
+  * _28/IUserRepository.cs
+
+  ``` C#
+  interface IUserRepository
+  {
+      User Find(UserId id);
+      User Find(UserName name);
+      // オーバーロードがサポートされていない言語の場合は命名によりバリエーションを増やす
+      // User FindByUserName(UserName name);
+  }
+  ```
+
 ## 5.9 まとめ
+
+* ロジックが特定のインフラストラクチャ技術に依存することはソフトウェアを硬直化させる
+* リポジトリを利用することでデータの永続化にまつわる処理を抽象化する
+  * ソフトウェアに柔軟性を与える
+    * データストアが決まっていない段階でもインメモリのリポジトリを利用して実装できる
+    * データストアごとに専用のリポジトリを実装して差し替えができる
+    * テストが容易になる
+* ドメインルールから特定のデータストアに関する処理を分離することで処理の意図を明確にする
