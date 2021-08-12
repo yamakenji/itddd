@@ -16,6 +16,8 @@ SNSのサークル機能を実現する
 
 ``` plantuml
 
+@startuml
+
 actor "ユーザ" as User
 
 usecase "サークルを作成する" as CreateCircle
@@ -24,6 +26,7 @@ usecase "サークルに参加する" as JoinCircle
 User --> CreateCircle
 User --> JoinCircle
 
+@enduml
 ```
 
 サークルの前提条件
