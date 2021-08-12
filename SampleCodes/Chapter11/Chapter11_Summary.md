@@ -10,7 +10,7 @@
 
 ## 11.2 題材とする機能
 
-SNSのユーザ機能
+SNSのサークル機能を実現する
 
 ### 11.2.1 サークル機能の分析
 
@@ -33,3 +33,52 @@ User --> JoinCircle
 * サークルに所属するユーザの最大数はサークルのオーナーとなるユーザを含めて30名まで
 
 ## 11.3 サークルの知識やルールをオブジェクトとして準備する
+
+ドメインオブジェクトを準備する
+
+``` plantuml
+
+@startuml
+
+class CircleId << ValueObject >> {
+  +Value : string
+}
+class CircleName << ValueObject >> {
+  +Value : string
+  +Equals() : boolean
+}
+note bottom of CircleName
+  サークル名は3文字以上20文字以下
+  サークル名は全てのサークルで重複しない
+end note
+
+class Circle << Entity >> {
+  +Id : CircleId
+  +Name : CircleName
+  +Owner : User
+  +Members : List<User>
+}
+class User
+Circle ..> CircleId
+Circle ..> CircleName
+Circle ..> User
+
+interface ICircleRepository <<Repository>> {
+  +Save() : void
+  +Find() : CircleId
+  +Find() : CircleName
+}
+interface ICircleFactory{
+  +Create() : Circle
+}
+class CircleService{
+  -circleRepository : ICircleRepository
+  +Exists() : boolean
+}
+CircleService ..> ICircleRepository
+@enduml
+
+```
+
+## 11.4 ユースケースを組み立てる
+
