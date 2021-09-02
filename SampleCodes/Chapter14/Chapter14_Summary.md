@@ -176,3 +176,137 @@ IUserRepository <|.. EFUserRepository
 
 ![図14.7]
 
+ゲーム機の例
+
+![図14.8]
+
+アプリケーションでも同様にユーザーインターフェイスや保存媒体を変更可能にする
+
+**ポートアンドアダプタ**とも呼ばれる
+
+* アプリケーションに対する入力を受け持つポートとアダプタをそれぞれプライマリポート、プライマリアダプタという
+* アプリケーションが外部に対してインタラクトするポートをセカンダリポートと表現し、実装するオブジェクトをセカンダリアダプタと呼ぶ
+
+``` csharp
+
+public class UserApplicationService
+{
+    private readonly IUserFactory userFactory; 
+    private readonly IUserRepository userRepository;
+    private readonly UserService userService;
+
+// (...略...)
+
+    public void Update(UserUpdateCommand command)
+    {
+        using (var transaction = new TransactionScope())
+        {
+            var id = new UserId(command.Id);
+            var user = userRepository.Find(id);
+            if (user == null)
+            {
+                throw new UserNotFoundException(id);
+            }
+
+            if (command.Name != null)
+            {
+                var name = new UserName(command.Name);
+                user.ChangeName(name);
+
+                if (userService.Exists(user))
+                {
+                    throw new CanNotRegisterUserException(user, "ユーザは既に存在しています。");
+                }
+            }
+
+            // セカンダリポートであるIUserRepositoryの処理を呼び出す
+            // 処理は実体であるセカンダリアダプタに移る
+            userRepository.Save(user);
+            
+            transaction.Complete();
+        }
+    }
+}
+
+```
+
+Update メソッドを呼び出すクライアントはプライマリアダプタ、Update メソッドはプライマリポートに当たる
+
+アプリケーションは IUserRepository というセカンダリポートを呼び出すことで、具体的な実装（セカンダリアダプタ）からインスタンスを再構築したり、永続化を依頼したりする
+
+レイヤードアーキテクチャとの違いは、インターフェイスを利用した依存関係の整理に言及しているところ
+
+### 14.2.3 クリーンアーキテクチャとは
+
+![図14.10]
+
+* ビジネスルールをカプセル化したモジュールの中心に据える
+* クリーンアーキテクチャの文脈でのエンティティは、ドメインオブジェクトに近い概念
+* ユーザーインターフェイスやデータストアなどの詳細を端に追いやり、依存の方向を内側に向けることで、詳細が抽象に依存するという依存関係逆転の法則を達成する
+* ヘキサゴナルアーキテクチャと目的とするところは同じ
+* 両者の違いは、クリーンアーキテクチャには、コンセプトを実現する具体的な実装方針が明示されているところ
+
+![図14.11]
+
+``` plantuml
+
+@startuml
+
+class Controller
+
+note top of Controller
+    クライアントは IUserGetInputPort 越しに Interactor を呼び出す
+end note
+
+interface IUserGetInputPort {
+    Handle()
+}
+
+note right of IUserGetInputPort
+    Input Port
+end note
+
+together {
+
+    class UserGetInteractor {
+        Handle()
+    }
+
+    class StubUserGetInteractor {
+        Handle()
+    }
+}
+
+note top of UserGetInteractor
+    Input Port を実装してユースケースを実現する
+    アプリケーションサービスのメソッドをそのままクラスにしたもの
+end note
+
+note right of StubUserGetInteractor
+    スタブを差し替えることでテストの実施が可能になる
+end note
+
+interface IUserRepository
+interface IUserGetPresenter
+
+Controller -> IUserGetInputPort
+
+IUserGetInputPort <|.. UserGetInteractor
+UserGetInteractor ..> IUserRepository
+UserGetInteractor ..> IUserGetPresenter
+
+StubUserGetInteractor ..|> IUserGetInputPort
+StubUserGetInteractor ..> IUserGetPresenter
+
+@enduml
+
+```
+
+クリーンアーキテクチャのコンセプトで重要なことは、**ビジネスルールをカプセル化したモジュールの中心に据え、依存の方向を絶対的に制御すること**
+
+## 14.3 まとめ
+
+* アーキテクチャは一度に多くのことを考えすぎないこと
+* アーキテクチャは方針を示し、各所で考える範囲を狭めることで集中を促す
+* ドメイン駆動設計においてアーキテクチャは主役ではない
+* ドメインの隔離を促すことができれば、どのアーキテクチャを採用しても構わない
